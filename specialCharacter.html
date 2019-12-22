@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<script>
+
+//https://www.w3schools.com/jsref/tryit.asp?filename=tryjsref_radio_value3
+function myFunction() {
+
+    // var CSVSelect = document.getElementById("CSVSelect");
+    // var TextException1Select = document.getElementById("TextException1Select");
+    // var MathException1Select = document.getElementById("MathException1Select");
+    // var MathException2Select = document.getElementById("MathException2Select");
+    // var CustomException = document.getElementById("CustomException");
+
+
+    const isTrue = TextException1Select.checked ? true : false;
+
+  var x = document.getElementById("myFile");
+
+  var uploadedFile = x.files[0];
+
+  var fileReader = new FileReader();
+
+  fileReader.onload = function(event) {
+      var content = event.target.result;
+      content = content.split('\n');
+      //console.log(content.split('\n'));
+      
+      var errors = findSpecialCharacters(content, 
+                    document.getElementById("CSVSelect").checked?true:false, 
+                    document.getElementById("TextException1Select").checked?true:false, 
+                    document.getElementById("MathException1Select").checked?true:false, 
+                    document.getElementById("MathException2Select").checked?true:false, 
+                    document.getElementById("CustomException").value);
+
+      // for (var lineNo = 0; lineNo < content.length; lineNo++) {
+      //   console.log(content[lineNo]);  
+      //   var node = document.createTextNode(content[lineNo]);
+      //   var para = document.createElement("p");
+      //   para.appendChild(node);
+      //   var element = document.getElementById("fileContent");
+      //   element.appendChild(para);
+      // }
+      for (var lineNo = 0; lineNo < errors.length; lineNo++) {
+        console.log(errors[lineNo]);
+        var node = document.createTextNode(errors[lineNo]);
+        var para = document.createElement("p");
+        para.appendChild(node);
+        var element = document.getElementById("errors");
+        element.appendChild(para);
+      }
+      //console.log(errors);
+      //document.getElementById('fileContent').innerHTML = "<p>"+ content+"</p>";
+      //document.getElementById('errors').innerHTML =  "<p>"+ errors+"</p>";
+      //document.getElementById('fileContent').innerHTML = content;
+      //document.getElementById('errors').innerHTML = JSON.stringify(errors);
+  }
+
+  fileReader.readAsText(uploadedFile);
+
+  // var input = ['abc', 'def', 'ghi123'];
+  // console.log(findSpecialCharacters(input,false, false, false, false, false,null ));
+
+}
+
+function  findSpecialCharacters(input, csvExceptionsSet, textExceptions1Set, mathExceptions1Set, mathExceptions2Set, CustomException) {
+    var charSet = (function (s) { var a = []; while (s-- > 0)
+        a.push(false); return a; })(128);
+    var csvException = ([',', ' ', '\n', '\r'].slice(0));
+    var TextException1 = (['!', '\"', '#', '$', '%', '&', '|', '\'', '.', '\\', ':', ';', '?', '@', '_', '`', '~', '^'].slice(0));
+    var MathException1 = (['(', ')', '*', '+', '-', '/', '<', '=', '>', '[', ']', '{', '}'].slice(0));
+    var MathException2 = (['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'].slice(0));
+    for (var i = 0; i <128; i++) {
+        {
+            var c = String.fromCharCode(i);
+            if (csvExceptionsSet && (csvException.indexOf((c)) >= 0)) {
+                charSet[i] = true;
+            }
+            else if (textExceptions1Set && (TextException1.indexOf((c)) >= 0)) {
+                charSet[i] = true;
+            }
+            else if (mathExceptions1Set && (MathException1.indexOf((c)) >= 0)) {
+                charSet[i] = true;
+            }
+            else if (mathExceptions2Set && (MathException2.indexOf((c)) >= 0)) {
+                charSet[i] = true;
+            }
+            else if (CustomException==null || CustomException. indexOf(c) >= 0) {
+                charSet[i] = true;
+            }
+            else if (((function (c) { return c.charCodeAt == null ? c : c.charCodeAt(0); })(c) >= 'a'.charCodeAt(0) && (function (c) { return c.charCodeAt == null ? c : c.charCodeAt(0); })(c) <= 'z'.charCodeAt(0)) || ((function (c) { return c.charCodeAt == null ? c : c.charCodeAt(0); })(c) >= 'A'.charCodeAt(0) && (function (c) { return c.charCodeAt == null ? c : c.charCodeAt(0); })(c) <= 'Z'.charCodeAt(0))) {
+                charSet[i] = true;
+            }
+        }
+        ;
+    }
+    var specialCharDetails = ([]);
+    var beginning = "Beginning of the line {0}";
+    var afterWord = "After text {0} at line {1}";
+    for (var lineNo = 0; lineNo < input.length; lineNo++) {
+        {
+            var OuputlineNo = lineNo + 1;
+            var line = input[lineNo];
+            var beginningOfTheLine = true;
+            var pre = "";
+            var message = "";
+            for (var i = 0; i < line.length; i++) {
+                {
+                    pre += line.charAt(i);
+                    if (i > 0) {
+                        beginningOfTheLine = false;
+                    }
+                    if ((function (c) { return c.charCodeAt == null ? c : c.charCodeAt(0); })(line.charAt(i)) > 128 || !charSet[(line.charAt(i)).charCodeAt(0)]) {
+                        if (beginningOfTheLine) {
+                            message = beginning.format(OuputlineNo)
+                        }
+                        else {
+                            message = afterWord.format(pre,OuputlineNo)
+                        }
+                        /* add */ (specialCharDetails.push(message) > 0);
+                        break;
+                    }
+                    if (pre.length > 6) {
+                        pre = pre.substring(pre.length - 6);
+                    }
+                }
+                ;
+            }
+        }
+        ;
+    }
+    return specialCharDetails;
+};
+
+// First, checks if it isn't implemented yet.
+if (!String.prototype.format) {
+  String.prototype.format = function() {
+    var args = arguments;
+    return this.replace(/{(\d+)}/g, function(match, number) { 
+      return typeof args[number] != 'undefined'
+        ? args[number]
+        : match
+      ;
+    });
+  };
+}
+
+
+
+</script>
+<body>
+
+<h3>Check Special character in a file</h3>
+
+<input type="file" id="myFile">
+</br>
+<h3>Select Yes if File is allowed to contains</h3>
+
+<p>1. Mostly used CSV exceptional character <b>[',', ' ', '\n', '\r']</b></p>
+<input type="radio" name="csvException" value="true" id="CSVSelect" checked>Yes
+<input type="radio" name="csvException" value="false" id="CSVNotSelect">No
+</br>
+
+<p>2. Mostly used Text exceptional character <b>['!', '\"', '#', '$', '%', '&', '|', '\'', '.', '\\', ':', ';', '?', '@', '_', '`', '~', '^']</b></p>
+<input type="radio" name="TextException1" value="true" id="TextException1Select" checked>Yes
+<input type="radio" name="TextException1" value="false" id="TextException1NotSelect">No
+</p>
+
+<p>3. Maths symbol <b>['(', ')', '*', '+', '-', '/', '<', '=', '>', '[', ']', '{', '}']</b></p>
+<input type="radio" name="MathException1" value="true" id="MathException1Select" checked>Yes
+<input type="radio" name="MathException1" value="false" id="MathException1NotSelect">No
+</p>
+
+<p>4. Maths character <b>['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']</b></p>
+<input type="radio" name="MathException2" value="true" id="MathException2Select" checked>Yes
+<input type="radio" name="MathException2" value="false" id="MathException2NotSelect">No
+</p>
+
+<p><b>5. Add any other special character</b></p>
+<input type="textbox" name="CustomException" id="CustomException"/>
+</p>
+
+
+<button onclick="myFunction()">Check</button>
+<div>
+    <div id= "fileContent" style="float:left; width:50%;">
+
+    </div>
+    <div id="errors" style="float:left; width:50%;">
+
+    </div>
+</div>
+
+
+
+</body>
+</html>
